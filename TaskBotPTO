@@ -1,0 +1,329 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: PTO
+    triggerQueries:
+      - PTO
+      - Leave
+
+  actions:
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_mMbNnu
+      input: {}
+      output:
+        binding:
+          username: Topic.UserName
+
+      flowId: 6795c6f3-585d-ee11-be6f-000d3a31c6d4
+
+    - kind: AdaptiveCardPrompt
+      id: 1nXeaZ
+      card: |
+        {
+          "type": "AdaptiveCard",
+          "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+          "version": "1.0",
+          "body": [{
+        "type": "TextBlock",
+        "text": "PTO Start Date Input"
+        },
+        {
+        "type": "Input.Date",
+        "id": "date",
+        "placeholder": "Enter a date",
+        "value":  "@{currentdate}"
+        }
+        ],
+        "actions": [
+        {
+        "type": "Action.Submit",
+        "title": "OK"}
+        ]
+        }
+      output:
+        binding:
+          actionSubmitId: Topic.submit
+          date: Topic.ptoFromDate
+
+      outputType:
+        properties:
+          actionSubmitId: String
+          date: String
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_QKOdiQ
+      input:
+        binding:
+          text: =Topic.ptoFromDate
+
+      output:
+        binding:
+          isvalid: Topic.isValid
+
+      flowId: bd4fd468-5b5f-ee11-be6e-000d3a31c6d4
+
+    - kind: ConditionGroup
+      id: conditionGroup_BA1diP
+      conditions:
+        - id: conditionItem_9edlM2
+          condition: =Topic.isValid = 1
+
+      elseActions:
+        - kind: SendActivity
+          id: sendActivity_TGOlgj
+          activity: **PTO Start Date should be equal or greater than Today's date**
+
+        - kind: GotoAction
+          id: 3BnH8s
+          actionId: 1nXeaZ
+
+    - kind: AdaptiveCardPrompt
+      id: CuzhFc
+      card: |
+        {
+          "type": "AdaptiveCard",
+          "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+          "version": "1.0",
+          "body": [{
+        "type": "TextBlock",
+        "text": "PTO End Date Input"
+        },
+        {
+        "type": "Input.Date",
+        "id": "date",
+        "placeholder": "Enter a date",
+        "value":  "@{currentdate}"
+        }
+        ],
+        "actions": [
+        {
+        "type": "Action.Submit",
+        "title": "OK"}
+        ]
+        }
+      output:
+        binding:
+          actionSubmitId: Topic.actionSubmitId
+          date: Topic.ptoToDate
+
+      outputType:
+        properties:
+          actionSubmitId: String
+          date: String
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_xFblOD
+      input:
+        binding:
+          text: =Topic.ptoFromDate
+          text_1: =Topic.ptoToDate
+
+      output:
+        binding:
+          isenddatevalid: Topic.isEndDateValid
+
+      flowId: ff17f174-615f-ee11-be6e-000d3a31c6d4
+
+    - kind: ConditionGroup
+      id: conditionGroup_HqlZcI
+      conditions:
+        - id: conditionItem_Y9rsvR
+          condition: =Topic.isEndDateValid = 1
+
+      elseActions:
+        - kind: SendActivity
+          id: sendActivity_5HKB0o
+          activity: **PTO End Date should be equal or greater than PTO Start Date**
+
+        - kind: GotoAction
+          id: V7WkkP
+          actionId: CuzhFc
+
+    - kind: Question
+      id: question_jPo5G9
+      interruptionPolicy:
+        allowInterruption: true
+
+      variable: init:Topic.ptoReason
+      prompt: PTO Reason
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: Sick Leave
+              displayName: Sick Leave
+
+            - id: Vacation
+              displayName: Vacation
+
+            - id: Travel
+              displayName: Travel
+
+            - id: Paternity
+              displayName: Paternity
+
+            - id: Casual
+              displayName: Casual
+
+        displayName: EmbeddedEntity-1AV1EP
+
+    - kind: ConditionGroup
+      id: conditionGroup_Ucqd1T
+      conditions:
+        - id: conditionItem_vTVNq4
+          condition: =Topic.ptoReason = 'cr496_tastBot.topic.CompletePTOProcess.main.question_jPo5G9'.Vacation
+          actions:
+            - kind: SetVariable
+              id: setVariable_EH6Yls
+              variable: Topic.ptoReasonStr
+              value: Vacation
+
+        - id: conditionItem_znTtcC
+          condition: =Topic.ptoReason = 'cr496_tastBot.topic.CompletePTOProcess.main.question_jPo5G9'.Travel
+          actions:
+            - kind: SetVariable
+              id: setVariable_Aq7NO1
+              variable: Topic.ptoReasonStr
+              value: Travel
+
+        - id: conditionItem_gsQfQp
+          condition: =Topic.ptoReason = 'cr496_tastBot.topic.CompletePTOProcess.main.question_jPo5G9'.Paternity
+          actions:
+            - kind: SetVariable
+              id: setVariable_ihKOCv
+              variable: Topic.ptoReasonStr
+              value: Paternity
+
+        - id: conditionItem_P1n8o2
+          condition: =Topic.ptoReason = 'cr496_tastBot.topic.CompletePTOProcess.main.question_jPo5G9'.Casual
+          actions:
+            - kind: SetVariable
+              id: setVariable_C9el7P
+              variable: Topic.ptoReasonStr
+              value: Casual
+
+      elseActions:
+        - kind: SetVariable
+          id: setVariable_ktHnjT
+          variable: Topic.ptoReasonStr
+          value: NA
+
+    - kind: Question
+      id: question_yumug5
+      interruptionPolicy:
+        allowInterruption: true
+
+      variable: init:Topic.Var1
+      prompt: Accessibility to your emails
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: Limited Access
+              displayName: Limited Access
+
+            - id: No Access
+              displayName: No Access
+
+    - kind: ConditionGroup
+      id: conditionGroup_Yrr2yF
+      conditions:
+        - id: conditionItem_qSPTK1
+          condition: =Topic.Var1 = 'cr496_tastBot.topic.CompletePTOProcess.main.question_yumug5'.'Limited Access'
+          actions:
+            - kind: SetVariable
+              id: setVariable_YQcN6M
+              variable: Topic.AccessLevel
+              value: Limited Access
+
+        - id: conditionItem_UtcrrD
+          condition: =Topic.Var1 = 'cr496_tastBot.topic.CompletePTOProcess.main.question_yumug5'.'No Access'
+          actions:
+            - kind: SetVariable
+              id: setVariable_6nHNMZ
+              variable: Topic.AccessLevel
+              value: No Access
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_hFVWxd
+      input:
+        binding:
+          text: =Topic.ptoReasonStr
+          text_1: =Topic.ptoFromDate
+          text_2: =Topic.ptoToDate
+          text_3: =System.User.FirstName
+          text_4: =System.User.Email
+          text_5: =Topic.AccessLevel
+
+      output:
+        binding:
+          result_: Topic.Result
+
+      flowId: 3f3c750d-965c-ee11-be6f-000d3a31c6d4
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_b7DJ4W
+      input:
+        binding:
+          text: =Topic.ptoFromDate
+          text_1: =System.User.FirstName
+          text_2: =Topic.ptoToDate
+
+      output:
+        binding:
+          eventresult: Topic.eventResult
+
+      flowId: 2e3b238a-ef5c-ee11-be6f-000d3a31c6d4
+
+    - kind: Question
+      id: question_AiExWm
+      interruptionPolicy:
+        allowInterruption: true
+
+      alwaysPrompt: true
+      variable: init:Topic.setAutoreplies
+      prompt: Do you want to set Automatic Replies for Outlook?
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: Yes
+              displayName: Yes
+
+            - id: No
+              displayName: No
+
+    - kind: ConditionGroup
+      id: conditionGroup_DHT8Kz
+      conditions:
+        - id: conditionItem_gqHr1v
+          condition: =Topic.setAutoreplies = 'cr496_tastBot.topic.CompletePTOProcess.main.question_AiExWm'.Yes
+
+        - id: conditionItem_uAtjYY
+          condition: =Topic.setAutoreplies = 'cr496_tastBot.topic.CompletePTOProcess.main.question_AiExWm'.No
+          actions:
+            - kind: GotoAction
+              id: dVge52
+              actionId: sendActivity_3I58cD
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_xawhrc
+      input:
+        binding:
+          text: =Topic.ptoFromDate
+          text_1: =Topic.ptoToDate
+
+      output: {}
+      flowId: 259aea31-575d-ee11-be6f-000d3a31c6d4
+
+    - kind: SendActivity
+      id: sendActivity_3I58cD
+      activity:
+        quickReplies:
+          - kind: MessageBack
+            text: Your PTO request has been submitted!
